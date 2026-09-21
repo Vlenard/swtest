@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>Római szám konverter</title>
+
+    <link rel="stylesheet"
+          href="https://unpkg.com/qunit@3.0.0-alpha.4/qunit/qunit.css">
+</head>
+
+<body>
+
+<div id="qunit"></div>
+<div id="qunit-fixture"></div>
+
+<script src="https://unpkg.com/qunit@3.0.0-alpha.4/qunit/qunit.js"></script>
+
+<script>
+    /**
+     * Arab szám konvertálása római számmá.
+     */
+    function validate(n) {
+        if (typeof n !== "number" || Number.isNaN(n)) {
+            throw new TypeError("A bemenetnek érvényes számnak kell lennie.");
+        }
+        if (!Number.isInteger(n)) {
+            throw new TypeError("Csak egész szám konvertálható.");
+        }
+        if (n < 1 || n > 3999) {
+            throw new RangeError("A megadott számnak 1 és 3999 között kell lennie.");
+        }
+    }
+
+    function convertToRoman(n) {
+        validate(n);
+        return ["", "M", "MM", "MMM"][Math.floor(n / 1000)] +
+               ["", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"][Math.floor((n % 1000) / 100)] +
+               ["", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"][Math.floor((n % 100) / 10)] +
+               ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"][n % 10];
+    }
+
+    const arabRolRomaira = convertToRoman;
+    const toRoman = convertToRoman;
+
+    // QUnit tesztek
+    QUnit.module("Fő szimbólumok és alapvető kombinációk", function() {
+        QUnit.test("Alapszimbólumok", function(assert) {
+            assert.equal(convertToRoman(1), "I");
+            assert.equal(convertToRoman(5), "V");
+            assert.equal(convertToRoman(10), "X");
+            assert.equal(convertToRoman(50), "L");
+            assert.equal(convertToRoman(100), "C");
+            assert.equal(convertToRoman(500), "D");
+            assert.equal(convertToRoman(1000), "M");
+        });
+
+        QUnit.test("Kivonásos alapesetek", function(assert) {
+            assert.equal(convertToRoman(4), "IV");
+            assert.equal(convertToRoman(9), "IX");
+            assert.equal(convertToRoman(40), "XL");
+            assert.equal(convertToRoman(90), "XC");
+            assert.equal(convertToRoman(400), "CD");
+            assert.equal(convertToRoman(900), "CM");
+        });
+
+        QUnit.test("Egyszerű additív kombinációk", function(assert) {
+            assert.equal(convertToRoman(2), "II");
+            assert.equal(convertToRoman(3), "III");
+            assert.equal(convertToRoman(6), "VI");
+            assert.equal(convertToRoman(8), "VIII");
+            assert.equal(convertToRoman(15), "XV");
+            assert.equal(convertToRoman(20), "XX");
+        });
+    });
+
+    QUnit.module("Összetett számok és határértékek", function() {
+        QUnit.test("Tízes és egyes kombinációk", function(assert) {
+            assert.equal(convertToRoman(14), "XIV");
+            assert.equal(convertToRoman(19), "XIX");
+            assert.equal(convertToRoman(28), "XXVIII");
+            assert.equal(convertToRoman(39), "XXXIX");
+            assert.equal(convertToRoman(88), "LXXXVIII");
+        });
+
+        QUnit.test("Kerek százasok és ezresek", function(assert) {
+            assert.equal(convertToRoman(300), "CCC");
+            assert.equal(convertToRoman(800), "DCCC");
+            assert.equal(convertToRoman(2000), "MM");
+            assert.equal(convertToRoman(3000), "MMM");
+        });
+
+        QUnit.test("Összetett számok és évszámok", function(assert) {
+            assert.equal(convertToRoman(444), "CDXLIV");
+            assert.equal(convertToRoman(1984), "MCMLXXXIV");
+            assert.equal(convertToRoman(2026), "MMXXVI");
+        });
+
+        QUnit.test("Határértékek és maximális szimbólumhosszúság", function(assert) {
+            assert.equal(convertToRoman(1), "I");
+            assert.equal(convertToRoman(3999), "MMMCMXCIX");
+            assert.equal(convertToRoman(1999), "MCMXCIX");
+            assert.equal(convertToRoman(3888), "MMMDCCCLXXXVIII");
+        });
+    });
+
+    QUnit.module("Érvénytelen bemenetek hibakezelése és aliasok", function() {
+        QUnit.test("Tartományon kívüli értékek", function(assert) {
+            assert.throws(() => convertToRoman(0), RangeError);
+            assert.throws(() => convertToRoman(-1), RangeError);
+            assert.throws(() => convertToRoman(-50), RangeError);
+            assert.throws(() => convertToRoman(4000), RangeError);
+            assert.throws(() => convertToRoman(10000), RangeError);
+        });
+
+        QUnit.test("Nem egész számok", function(assert) {
+            assert.throws(() => convertToRoman(1.5), TypeError);
+            assert.throws(() => convertToRoman(3.1415), TypeError);
+        });
+
+        QUnit.test("Nem szám típusok", function(assert) {
+            assert.throws(() => convertToRoman(NaN), TypeError);
+            assert.throws(() => convertToRoman("10"), TypeError);
+            assert.throws(() => convertToRoman(null), TypeError);
+            assert.throws(() => convertToRoman(undefined), TypeError);
+            assert.throws(() => convertToRoman({}), TypeError);
+            assert.throws(() => convertToRoman(true), TypeError);
+        });
+
+        QUnit.test("Függvény aliasok ellenőrzése", function(assert) {
+            assert.equal(arabRolRomaira(10), "X");
+            assert.equal(toRoman(10), "X");
+        });
+    });
+</script>
+
+</body>
+</html>
